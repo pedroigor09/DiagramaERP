@@ -12,19 +12,19 @@ enum PessoaComDeficienciaEnum {
     DEFICIENCIAMOTORA, DEFICIENCIAVISUAL, DEFICIENCIAAUDITIVA , REABILITADO, NAOPOSSUI
 }
 
-enum TipoTarefaEnum {
-    RECORRENTE, ORDEM_SERVICO 
-}
+/*enum TipoTarefaEnum { */
+/*    RECORRENTE, ORDEM_SERVICO */
+} */
 
 
 
-enum SituacaoUsuarioEmpresaEnum {
-    ATIVO, INATIVO, BLOQUEADO, EXCLUIDO
-}
+/*enum SituacaoUsuarioEmpresaEnum { */
+/*    ATIVO, INATIVO, BLOQUEADO, EXCLUIDO */
+/*} */
 
-enum SituacaoUsuarioGestaoEnum {
-    ATIVO, INATIVO, BLOQUEADO, EXCLUIDO
-}
+/*enum SituacaoUsuarioGestaoEnum { */
+/*    ATIVO, INATIVO, BLOQUEADO, EXCLUIDO */
+/*} */
 
 enum EstadoCivilEnum {
     SOLTERO, CASADO, DIVORCIADO, VIUVO, UNIAO_ESTAVEL
@@ -51,9 +51,9 @@ enum SituacaoPagamentoCobrancaImpostoEnum {
 }
 
 
-enum SituacaoPlanoContaAzulEnum {
-    ATIVO, INATIVO, EXCLUIDO
-}
+/* enum SituacaoPlanoContaAzulEnum { */
+/*    ATIVO, INATIVO, EXCLUIDO */
+/*} */
 
 enum TipoContaBancoEnum {
     CONTACORRENTE, CONTAPOUPANCA, CONTASALARIO
@@ -169,17 +169,17 @@ enum EsferaEnum {
     MUNICIPAL, ESTADUAL, FEDERAL
 }
 
-enum SituacaoPagamentoEnum {
-    A_PAGAR, PAGO, EM_ATRASO
-}
+//enum SituacaoPagamentoEnum {
+//    A_PAGAR, PAGO, EM_ATRASO
+//}
 
-enum TipoSegmentoEnum {
-    SERVICO, COMERCIO, SERVICO_COMERCIO, INDUSTRIA
-}
+//enum TipoSegmentoEnum {
+//    SERVICO, COMERCIO, SERVICO_COMERCIO, INDUSTRIA
+//}
 
-enum TipoRedeSocialEnum {
-    FACEBOOK, TWITTER, INSTAGRAN, YOUTUBE, LINKEDIN, OUTROS
-}
+//enum TipoRedeSocialEnum {
+//    FACEBOOK, TWITTER, INSTAGRAN, YOUTUBE, LINKEDIN, OUTROS
+//}
 
 entity Pessoajuridica {
     razaoSocial String required
@@ -191,11 +191,7 @@ entity ImpostoEmpresa {
     diaVencimento Integer
 }
 
-entity CobrancaImpostoEmpresa {
-    diasAtraso Integer
-}
-
-entity NegociacaoImpostoEmpresa {
+entity NegociaImpostoEmpresa {
     diaVencimento Integer
     numeroParcelas Integer
     urlArquivoNegociacao String
@@ -211,6 +207,10 @@ entity ParcelaImpostoAPagar {
     valorMulta Double
     urlArquivoPagamento String
     urlArquivoComprovante String
+}
+
+entity CobrancaImpostoEmpresa {
+    diasAtraso Integer
 }
 
 entity Empresa {
@@ -304,7 +304,7 @@ entity PessoaFisica {
 }
 
 entity Funcionario {
-    numeroPisNisPasep String maxlength(11) required
+    numeroPisNisPasep String maxlength(11)
     reintegrado Boolean
     multiploVinculos Boolean
     dataOpcaoFgts String
@@ -532,15 +532,15 @@ entity FormaDePagamento {
     disponivel Boolean
 }
 
-entity GatewayPagamento {
-    nome String
-    disponivel Boolean
-}
-
-entity GatewayAssinaturaEmpresa {
-    codigoAssinatura String
-    disponivel Boolean
-}
+//entity GatewayPagamento {
+//    nome String
+//    disponivel Boolean
+//}
+//
+//entity GatewayAssinaturaEmpresa {
+//    codigoAssinatura String
+//    disponivel Boolean
+//}
 
 entity TermoContratoContabil {
     titulo String
@@ -674,6 +674,15 @@ entity AreaContabilContador {
 	pontuacaoAvaliacao Double
 }
 
+entity NegociacaoImpostoEmpresa {
+    diaVencimento Integer
+    numeroParcelas Integer
+    urlArquivoNegociacao String
+    numeroParcelasPagas Integer
+    numeroParcelasRegatantes Integer
+    valorPago Double
+}
+
 entity AreaContabil {
 	nome String
 	descricao TextBlob
@@ -682,19 +691,22 @@ entity AreaContabil {
 
 relationship OneToOne {
     Socio {PessoaFisica(nome) required} to PessoaFisica
-    Empresa {Pessoajuridica(razaoSocial) required} to Pessoajuridica
+    Empresa {PessoaJuridica(razaoSocial) required} to Pessoajuridica
 
-    Funcionario {ContratoFuncionario(codigoCargo) required} to ContratoFuncionario
+    //Pedro OneToOne - Realizado (Elton Checar)
+    Funcionario {ContratoFuncionario(nome) required} to ContratoFuncionario
 
-    PessoaFisica {Funcionario(numeroPisNisPasep) required} to Funcionario
+    PessoaFisica {Funcionario(nome) required} to Funcionario
+    PessoaFisica {Dependente(nome) required} to Dependente
 
-    Contador {PerfilContador(perfil) required} to PerfilContador
+    Contador {PerfilContador(nome) required} to PerfilContador
 
-    AgendaContador {Contador(nome) required} to Contador
+    Tarefa {AgendaContador(descricao) required} to AgendaContador
+    AgendaContador {Contador(horaInicio) required} to Contador
 
     Contador {PessoaFisica(nome) required} to PessoaFisica
 
-
+    // TUDO FEITO ATÉ AGORA
 }
 
 
@@ -723,57 +735,67 @@ relationship OneToMany {
     PessoaFisica to RedeSocialPessoa{PessoaFisica(nome) required}
     PessoaFisica to Dependente{PessoaFisica(nome) required}
 
-    Funcionario to Dependente{Funcionario(numeroPisNisPasep) required}
+    Funcionario to Dependente{Funcionario(nome) required}
 
-    ContratoFuncionario to Empresa{ContratoFuncionario(codigoCargo) required}
+    ContratoFuncionario to Empresa{ContratoFuncionario(nome) required}
 
-    Pessoajuridica to CertificadoDigital{Pessoajuridica(razaoSocial) required}
-    Pessoajuridica to FornecedorCertificado{Pessoajuridica(razaoSocial) required}
-    Pessoajuridica to RedeSocial{Pessoajuridica(razaoSocial) required}
-    Pessoajuridica to RedeSocialEmpresa{Pessoajuridica(razaoSocial) required}
-    Pessoajuridica to Cidade{Pessoajuridica(razaoSocial) required}
+    PessoaJuridica to Empresa{PessoaJuridica(razaoSocial) required}
+
+    PessoaJuridica to CertificadoDigital{PessoaJuridica(razaoSocial) required}
+    PessoaJuridica to FornecedorCertificado{PessoaJuridica(razaoSocial) required}
+    PessoaJuridica to RedeSocial{PessoaJuridica(nome) required}
+    PessoaJuridica to RedeSocialEmpresa{PessoaJuridica(nome) required}
+    PessoaJuridica to Cidade{PessoaJuridica(nome) required}
 
     Imposto to Empresa{Imposto(nome) required}
 
     NegociacaoImpostoEmpresa to ParcelaImpostoAPagar{NegociacaoImpostoEmpresa(urlArquivoNegociacao) required}
-    NegociacaoImpostoEmpresa to CobrancaImpostoEmpresa{NegociacaoImpostoEmpresa(urlArquivoNegociacao) required}
-    
-
-    ImpostoEmpresa to CobrancaImpostoEmpresa{ImpostoEmpresa(id) required}
+    NegociacaoImpostoEmpresa to CobrancaImpostoEmpresa{NegociacaoImpostoEmpresa(dataPagamento) required}
+    NegociacaoImpostoEmpresa to ImpostoEmpresa{NegociacaoImpostoEmpresa(diaVencimento) required}
+    CobrancaImpostoEmpresa to NegociacaoImpostoEmpresa{CobrancaImpostoEmpresa(id) required}
+    CobrancaImpostoEmpresa to ImpostoEmpresa{CobrancaImpostoEmpresa(id) required}
+    ImpostoEmpresa to CobrancaImpostoEmpresa{ImpostoEmpresa(diaVencimento) required}
     ImpostoEmpresa to NegociacaoImpostoEmpresa{ImpostoEmpresa(diaVencimento) required}
 
-    Empresa to DemissaoFuncionario{Empresa(razaoSocial) required}
+    Empresa to DemissaoFuncionario{Empresa(nome) required}
 
+    Empresa to Enquadramento{Empresa(nome) required}
+    Empresa to Ramo{Empresa(nome) required}
+    Empresa to Tributacao{Empresa(nome) required}
     Empresa to Socio{Empresa(razaoSocial) required}
 
-    AssinaturaEmpresa to GatewayPagamento{AssinaturaEmpresa(razaoSocial) required}
+    AssinaturaEmpresa to GatewayPagamento{AssinaturaEmpresa(nome) required}
     AssinaturaEmpresa to GatewayAssinaturaEmpresa{AssinaturaEmpresa(codigoAssinatura) required}
-    AssinaturaEmpresa to CobrancaEmpresa{AssinaturaEmpresa(razaoSocial) required}
-    AssinaturaEmpresa to TermoContratoContabil{AssinaturaEmpresa(razaoSocial) required}
-    AssinaturaEmpresa to DescontoPeriodoPagamento{AssinaturaEmpresa(razaoSocial) required}
-    AssinaturaEmpresa to ServicoContabil{AssinaturaEmpresa(razaoSocial) required}
+    AssinaturaEmpresa to FormaDePagamento{AssinaturaEmpresa(nome) required}
+    AssinaturaEmpresa to CobrancaEmpresa{AssinaturaEmpresa(dataCobranca) required}
+    AssinaturaEmpresa to TermoContratoContabil{AssinaturaEmpresa(urlDocumentoFonte) required}
+    AssinaturaEmpresa to PeriodoPagamento{AssinaturaEmpresa(periodo) required}
+    AssinaturaEmpresa to DescontoPeriodoPagamento{AssinaturaEmpresa(percentual) required}
+    AssinaturaEmpresa to ServicoContabil{AssinaturaEmpresa(nome) required}
 
     PlanoAssinaturaContabil to Tributacao{PlanoAssinaturaContabil(nome) required}
-    PlanoAssinaturaContabil to AdicionalTributacao{PlanoAssinaturaContabil(nome) required}
+    PlanoAssinaturaContabil to AdicionalTributacao{PlanoAssinaturaContabil(valor) required}
     PlanoAssinaturaContabil to Ramo{PlanoAssinaturaContabil(nome) required}
-    PlanoAssinaturaContabil to AdicionalRamo{PlanoAssinaturaContabil(nome) required}
+    PlanoAssinaturaContabil to AdicionalRamo{PlanoAssinaturaContabil(valor) required}
     PlanoAssinaturaContabil to Enquadramento{PlanoAssinaturaContabil(nome) required}
-    PlanoAssinaturaContabil to AdicionalEnquadramento{PlanoAssinaturaContabil(nome) required}
+    PlanoAssinaturaContabil to AdicionalEnquadramento{PlanoAssinaturaContabil(valor) required}
     PlanoAssinaturaContabil to ServicoContabil{PlanoAssinaturaContabil(nome) required}
-    PlanoAssinaturaContabil to ServicoContabilPlanoAssinatura{PlanoAssinaturaContabil(nome) required}
+    PlanoAssinaturaContabil to ServicoContabilPlanoAssinatura{PlanoAssinaturaContabil(descontoServico) required}
 
     ServicoContabil to FluxoServico{ServicoContabil(nome) required}
     ServicoContabil to OrdemServico{ServicoContabil(valor) required}
     ServicoContabil to AreaContabil{ServicoContabil(nome) required}
     FluxoServico to EtapaFluxoServico{FluxoServico(nome) required}
 
+
+    Contador to AgendaContador{Contador(nome) required} 
     Contador to Tarefa{Contador(nome) required} 
 
-    Tarefa to ServicoAssinatura{Tarefa(descricao) required}
-    Tarefa to Subtarefa{Tarefa(descricao) required}
-    Tarefa to OrdemServicoContabil{Tarefa(descricao) required}
+    Tarefa to ServicoAssinatura{Tarefa(diaAdministrativo) required}
+    Tarefa to SubTarefa{Tarefa(nome) required}
+    Tarefa to OrdemServicoContabil{Tarefa(nome) required}
 
-    ServicoAssinatura to ServicoContabil{ServicoAssinatura(diaAdministrativo) required}
+    ServicoAssinatura to ServicoContabil{ServicoAssinatura(nome) required}
 
     Contador to AreaContabilContador{Contador(nome) required}
     Contador to AreaContabil{Contador(nome) required}
@@ -786,11 +808,11 @@ relationship OneToMany {
     Cidade to EnderecoPessoa{Cidade(nome) required}
     Cidade to EnderecoEmpresa{Cidade(nome) required}
 
-    Pessoajuridica to CertificadoDigitalEmpresa{Pessoajuridica(razaoSocial) required}
+    Pessoajuridica to CertificadoDigitalEmpresa{PessoaJuridica(razaoSocial) required}
     CertificadoDigital to CertificadoDigitalEmpresa{CertificadoDigital(nome) required}
     FornecedorCertificado to CertificadoDigitalEmpresa{FornecedorCertificado(razaoSocial) required}
-    Pessoajuridica to DocsEmpresa{Pessoajuridica(razaoSocial) required}
-    Pessoajuridica to EnderecoEmpresa{Pessoajuridica(razaoSocial) required}
+    Pessoajuridica to DocsEmpresa{PessoaJuridica(razaoSocial) required}
+    Pessoajuridica to EnderecoEmpresa{PessoaJuridica(razaoSocial) required}
     PeriodoPagamento to AssinaturaEmpresa{PeriodoPagamento(periodo)required }
     Empresa to Socio{Empresa(razaoSocial) required}
     FormaDePagamento to AssinaturaEmpresa{FormaDePagamento(forma) required}
